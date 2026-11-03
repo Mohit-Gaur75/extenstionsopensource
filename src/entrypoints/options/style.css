@@ -1,0 +1,68 @@
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  font:
+    15px/1.5 system-ui,
+    sans-serif;
+}
+
+main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+h1 {
+  font-size: 22px;
+}
+
+h2 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.buttons {
+  display: flex;
+  gap: 8px;
+}
+
+textarea {
+  font:
+    13px ui-monospace,
+    monospace;
+}
+
+button,
+select {
+  align-self: flex-start;
+  padding: 6px 12px;
+  font: inherit;
+}
+
+.hint {
+  margin: 0;
+  color: GrayText;
+  font-size: 13px;
+}

@@ -1,0 +1,9 @@
+node_modules
+.output
+.wxt
+.wxt-cache
+coverage
+stats.html
+*.log
+.env
+web-ext.config.ts

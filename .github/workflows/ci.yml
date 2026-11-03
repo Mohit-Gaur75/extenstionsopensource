@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run compile
+      - run: npm test
+
+  build:
+    needs: check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        browser: [chrome, firefox]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Build ${{ matrix.browser }}
+        run: npm run ${{ matrix.browser == 'chrome' && 'build' || 'build:firefox' }}
+      - name: Zip ${{ matrix.browser }}
+        run: npm run ${{ matrix.browser == 'chrome' && 'zip' || 'zip:firefox' }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cursed-fonts-${{ matrix.browser }}
+          path: .output/*.zip

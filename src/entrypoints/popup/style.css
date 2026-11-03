@@ -1,0 +1,153 @@
+:root {
+  color-scheme: light dark;
+  --bg: #fafaf9;
+  --card: #ffffff;
+  --text: #1c1917;
+  --muted: #78716c;
+  --border: #e7e5e4;
+  --accent: #7c3aed;
+  --good: #15803d;
+  --bad: #b91c1c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1917;
+    --card: #292524;
+    --text: #fafaf9;
+    --muted: #a8a29e;
+    --border: #44403c;
+    --accent: #a78bfa;
+    --good: #4ade80;
+    --bad: #f87171;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  width: 340px;
+  background: var(--bg);
+  color: var(--text);
+  font:
+    14px/1.4 system-ui,
+    sans-serif;
+}
+
+.popup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.source,
+.muted {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.font-name {
+  font-size: 16px;
+}
+
+.preview {
+  margin: 0;
+  min-height: 3.6em;
+  font-size: 20px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.preview.spinning {
+  color: var(--accent);
+}
+
+button,
+select {
+  padding: 5px 10px;
+  color: inherit;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:disabled,
+select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button.primary {
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.switch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+a {
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.result {
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.result p {
+  margin: 6px 0 0;
+}
+
+.result.good strong {
+  color: var(--good);
+}
+
+.result.bad strong {
+  color: var(--bad);
+}
