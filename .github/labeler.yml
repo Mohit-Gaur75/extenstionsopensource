@@ -1,0 +1,27 @@
+fonts:
+  - changed-files:
+      - any-glob-to-any-file: ['src/fonts/**']
+quiz:
+  - changed-files:
+      - any-glob-to-any-file: ['src/lib/quiz.ts', 'src/entrypoints/popup/Quiz.tsx']
+popup:
+  - changed-files:
+      - any-glob-to-any-file: ['src/entrypoints/popup/**']
+options:
+  - changed-files:
+      - any-glob-to-any-file: ['src/entrypoints/options/**']
+content-script:
+  - changed-files:
+      - any-glob-to-any-file: ['src/entrypoints/content.ts', 'src/lib/fontface.ts']
+background:
+  - changed-files:
+      - any-glob-to-any-file: ['src/entrypoints/background.ts']
+tests:
+  - changed-files:
+      - any-glob-to-any-file: ['tests/**']
+ci:
+  - changed-files:
+      - any-glob-to-any-file: ['.github/**']
+docs:
+  - changed-files:
+      - any-glob-to-any-file: ['README.md', 'CONTRIBUTING.md']
