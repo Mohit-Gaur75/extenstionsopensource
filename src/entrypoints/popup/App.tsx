@@ -187,7 +187,7 @@ export function App() {
   return (
     <main className="popup">
       <header className="row">
-        <h1>Cursed Fonts</h1>
+        <h1>✨ Cursed Fonts</h1>
         <label className="switch" title="Master on/off">
           <input
             type="checkbox"
