@@ -73,6 +73,7 @@ export default defineBackground(() => {
       tab: tabOverrides.get(tabId) ?? null,
       site: overrides.sites[hostname] ?? null,
       global: overrides.global,
+      pinned: settings.pinnedSites[hostname] ?? null,
       now,
       isKnown: (id) => getFontById(id) !== undefined,
     });

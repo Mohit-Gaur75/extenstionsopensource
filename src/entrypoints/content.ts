@@ -188,6 +188,7 @@ export default defineContentScript({
           tab: tab?.fontId ?? null,
           site: overrides.sites[host] ?? null,
           global: overrides.global,
+          pinned: settings.pinnedSites[host] ?? null,
           now,
           isKnown: (id) => getFontById(id) !== undefined,
         });

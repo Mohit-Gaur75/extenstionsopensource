@@ -2,7 +2,7 @@ import { StrictMode, useCallback, useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { CATEGORIES } from '@/lib/fonts';
 import type { Category } from '@/lib/fonts';
-import { DEFAULT_SETTINGS, sanitizeSettings } from '@/lib/state';
+import { DEFAULT_SETTINGS, sanitizeSettings, unpinFont } from '@/lib/state';
 import type { Settings } from '@/lib/state';
 import { getSettings, setSettings } from '@/lib/storage';
 import './style.css';
@@ -184,6 +184,31 @@ function Options() {
           Save {listKey}
         </button>
       </section>
+
+      {Object.keys(settings.pinnedSites).length > 0 && (
+        <section>
+          <h2>Pinned sites</h2>
+          <p className="hint">Fonts pinned to a site never change and do not expire at midnight.</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {Object.entries(settings.pinnedSites).map(([host, fontId]) => (
+              <div
+                key={host}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '8px',
+                }}
+              >
+                <span>
+                  <strong>{host}</strong>: {fontId}
+                </span>
+                <button onClick={() => void save(unpinFont(settings, host))}>Unpin</button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section>
         <h2>Backup</h2>

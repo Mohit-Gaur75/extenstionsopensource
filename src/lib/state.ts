@@ -3,7 +3,7 @@ import { CATEGORIES, isCategory, isLevel } from './fonts';
 import { pickDaily, toISODate } from './pick';
 
 export type OverrideMode = 'tab' | 'site' | 'global';
-export type FontSource = OverrideMode | 'daily';
+export type FontSource = OverrideMode | 'daily' | 'pinned';
 
 /** A saved override. `site` and `global` expire at local midnight. */
 export interface StoredOverride {
@@ -29,6 +29,7 @@ export interface Settings {
   listMode: 'blocklist' | 'allowlist';
   blocklist: string[];
   allowlist: string[];
+  pinnedSites: Record<string, string>;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -41,6 +42,7 @@ export const DEFAULT_SETTINGS: Settings = {
   listMode: 'blocklist',
   blocklist: [],
   allowlist: [],
+  pinnedSites: {},
 };
 
 // ---------- time ----------
@@ -79,6 +81,8 @@ export interface ResolveInput {
   tab?: string | null;
   site?: StoredOverride | null;
   global?: StoredOverride | null;
+  /** Per-site pinned font from settings. */
+  pinned?: string | null;
   now: number;
   /** Ignore overrides whose font no longer exists. */
   isKnown?: (fontId: string) => boolean;
@@ -89,7 +93,7 @@ export interface Resolution {
   source: FontSource;
 }
 
-/** Resolution order: tab > site > global > daily. Expired or unknown overrides are skipped. */
+/** Resolution order: tab > site > global > pinned > daily. Expired or unknown overrides are skipped. */
 export function resolveFont(input: ResolveInput): Resolution {
   const known = input.isKnown ?? (() => true);
   if (input.tab && known(input.tab)) return { fontId: input.tab, source: 'tab' };
@@ -100,6 +104,9 @@ export function resolveFont(input: ResolveInput): Resolution {
     if (override && !isExpired(override, input.now) && known(override.fontId)) {
       return { fontId: override.fontId, source };
     }
+  }
+  if (input.pinned && known(input.pinned)) {
+    return { fontId: input.pinned, source: 'pinned' };
   }
   return { fontId: input.dailyId, source: 'daily' };
 }
@@ -112,6 +119,8 @@ export function sourceLabel(source: FontSource): string {
       return 'Random (this site)';
     case 'global':
       return 'Random (everywhere, until midnight)';
+    case 'pinned':
+      return 'Pinned to this site';
     default:
       return "Today's pick";
   }
@@ -171,6 +180,29 @@ export function toggleSite(settings: Settings, host: string): Settings {
   return { ...settings, [key]: next };
 }
 
+/** Pin a font to a hostname so it persists indefinitely. Returns new settings. */
+export function pinFont(settings: Settings, host: string, fontId: string): Settings {
+  const h = normalizeHost(host);
+  return {
+    ...settings,
+    pinnedSites: {
+      ...settings.pinnedSites,
+      [h]: fontId,
+    },
+  };
+}
+
+/** Unpin a font from a hostname. Returns new settings. */
+export function unpinFont(settings: Settings, host: string): Settings {
+  const h = normalizeHost(host);
+  const next = { ...settings.pinnedSites };
+  delete next[h];
+  return {
+    ...settings,
+    pinnedSites: next,
+  };
+}
+
 // ---------- settings validation ----------
 
 function cleanHosts(value: unknown): string[] {
@@ -180,6 +212,18 @@ function cleanHosts(value: unknown): string[] {
     .map(normalizeHost)
     .filter((v) => v !== '');
   return [...new Set(hosts)];
+}
+
+function cleanPinnedSites(value: unknown): Record<string, string> {
+  if (typeof value !== 'object' || value === null) return {};
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(value)) {
+    if (typeof v === 'string' && v.trim() !== '') {
+      const host = normalizeHost(k);
+      if (host) out[host] = v.trim();
+    }
+  }
+  return out;
 }
 
 /** Coerce untrusted data (storage, imported JSON) into valid Settings. */
@@ -198,5 +242,6 @@ export function sanitizeSettings(raw: unknown): Settings {
     listMode: r.listMode === 'allowlist' ? 'allowlist' : 'blocklist',
     blocklist: cleanHosts(r.blocklist),
     allowlist: cleanHosts(r.allowlist),
+    pinnedSites: cleanPinnedSites(r.pinnedSites),
   };
 }
