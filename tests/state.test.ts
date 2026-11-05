@@ -7,10 +7,13 @@ import {
   isSiteEnabled,
   nextMidnight,
   normalizeHost,
+  pinFont,
   pruneOverrides,
   resolveFont,
   sanitizeSettings,
+  sourceLabel,
   toggleSite,
+  unpinFont,
 } from '../src/lib/state';
 import type { OverrideStore, Settings } from '../src/lib/state';
 
@@ -32,25 +35,57 @@ describe('resolveFont order', () => {
     });
   });
 
-  it('prefers global over daily', () => {
-    expect(resolveFont({ dailyId: 'daily', global, now: NOON })).toEqual({
+  it('prefers global over pinned and daily', () => {
+    expect(resolveFont({ dailyId: 'daily', global, pinned: 'pinned-font', now: NOON })).toEqual({
       fontId: 'global-font',
       source: 'global',
     });
   });
 
-  it('falls back to daily', () => {
+  it('prefers pinned over daily', () => {
+    expect(resolveFont({ dailyId: 'daily', pinned: 'pinned-font', now: NOON })).toEqual({
+      fontId: 'pinned-font',
+      source: 'pinned',
+    });
+  });
+
+  it('falls back to daily when unpinned', () => {
     expect(
-      resolveFont({ dailyId: 'daily', tab: null, site: null, global: null, now: NOON }),
+      resolveFont({
+        dailyId: 'daily',
+        tab: null,
+        site: null,
+        global: null,
+        pinned: null,
+        now: NOON,
+      }),
     ).toEqual({
       fontId: 'daily',
       source: 'daily',
     });
   });
 
-  it('skips expired overrides and falls through', () => {
+  it('skips expired overrides and falls back to pinned font if available', () => {
     const later = nextMidnight(NOON) + 1;
-    expect(resolveFont({ dailyId: 'daily', site, global, now: later }).source).toBe('daily');
+    expect(
+      resolveFont({ dailyId: 'daily', site, global, pinned: 'pinned-font', now: later }),
+    ).toEqual({
+      fontId: 'pinned-font',
+      source: 'pinned',
+    });
+  });
+
+  it('skips unknown font ids for pinned fonts', () => {
+    const r = resolveFont({
+      dailyId: 'daily',
+      pinned: 'unknown-font',
+      now: NOON,
+      isKnown: (id) => id !== 'unknown-font',
+    });
+    expect(r).toEqual({
+      fontId: 'daily',
+      source: 'daily',
+    });
   });
 
   it('skips unknown font ids', () => {
@@ -135,6 +170,23 @@ describe('site rules', () => {
   });
 });
 
+describe('per-site pinned fonts', () => {
+  it('pins a font to a normalized host', () => {
+    const s = pinFont(DEFAULT_SETTINGS, 'www.GitHub.com', 'jetbrains-mono');
+    expect(s.pinnedSites).toEqual({ 'github.com': 'jetbrains-mono' });
+  });
+
+  it('unpins a font from a normalized host', () => {
+    const pinned = pinFont(DEFAULT_SETTINGS, 'github.com', 'jetbrains-mono');
+    const unpinned = unpinFont(pinned, 'www.github.com');
+    expect(unpinned.pinnedSites).toEqual({});
+  });
+
+  it('labels pinned source clearly', () => {
+    expect(sourceLabel('pinned')).toBe('Pinned to this site');
+  });
+});
+
 describe('sanitizeSettings', () => {
   it('returns defaults for garbage', () => {
     expect(sanitizeSettings(null)).toEqual(DEFAULT_SETTINGS);
@@ -148,11 +200,17 @@ describe('sanitizeSettings', () => {
       dyslexiaSafe: true,
       blocklist: ['A.com', 'a.com', 5, ''],
       listMode: 'allowlist',
+      pinnedSites: {
+        'www.example.com': 'roboto',
+        '': 'empty-host',
+        invalidVal: 123,
+      },
     });
     expect(s.level).toBe(DEFAULT_SETTINGS.level);
     expect(s.categories).toEqual(['mono']);
     expect(s.dyslexiaSafe).toBe(true);
     expect(s.blocklist).toEqual(['a.com']);
     expect(s.listMode).toBe('allowlist');
+    expect(s.pinnedSites).toEqual({ 'example.com': 'roboto' });
   });
 });

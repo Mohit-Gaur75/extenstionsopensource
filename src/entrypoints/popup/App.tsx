@@ -10,10 +10,12 @@ import {
   dailyFont,
   hostFromUrl,
   isSiteEnabled,
+  pinFont,
   pruneOverrides,
   resolveFont,
   sourceLabel,
   toggleSite,
+  unpinFont,
 } from '@/lib/state';
 import type { OverrideMode, OverrideStore, Resolution, Settings } from '@/lib/state';
 import { getSettings, readLocal, sendMessage, setSettings, updateSettings } from '@/lib/storage';
@@ -66,6 +68,7 @@ async function loadSnapshot(): Promise<Snapshot> {
     tab: tabReply.fontId,
     site: tab ? (overrides.sites[tab.hostname] ?? null) : null,
     global: overrides.global,
+    pinned: tab ? (settings.pinnedSites[tab.hostname] ?? null) : null,
     now,
     isKnown: (id) => getFontById(id) !== undefined,
   });
@@ -221,12 +224,33 @@ export function App() {
               </option>
             ))}
           </select>
-          {resolution.source !== 'daily' && (
+          {resolution.source !== 'daily' && resolution.source !== 'pinned' && (
             <button disabled={!tab || busy} onClick={() => void back()}>
               ↩ Back to today&apos;s font
             </button>
           )}
         </div>
+        {tab && siteOn && (
+          <div className="row">
+            {settings.pinnedSites[tab.hostname] ? (
+              <button
+                disabled={busy}
+                onClick={() => void setSettings(unpinFont(settings, tab.hostname)).then(reload)}
+              >
+                📍 Unpin font
+              </button>
+            ) : (
+              <button
+                disabled={!canAct}
+                onClick={() =>
+                  void setSettings(pinFont(settings, tab.hostname, shown.id)).then(reload)
+                }
+              >
+                📌 Pin to this site
+              </button>
+            )}
+          </div>
+        )}
       </section>
 
       <section className="card">
