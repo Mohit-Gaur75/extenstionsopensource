@@ -42,21 +42,35 @@ export function Quiz({ daily, today, stats: initial, onClose }: Props) {
 
   return (
     <div className="quiz">
-      <header className="row">
-        <h1>Guess today&apos;s font</h1>
-        <button onClick={onClose}>Back</button>
+      <header className="header">
+        <div className="brand">
+          <span className="brand-icon">?</span>
+          <h1>Daily Font Quiz</h1>
+        </div>
+        <button className="subtle-btn" onClick={onClose}>
+          Back
+        </button>
       </header>
-      <p
-        className="preview"
-        style={
-          ready ? { fontFamily: `"${familyName(revealed)}", ${genericFallback(revealed)}` } : {}
-        }
-      >
-        {SAMPLE}
-      </p>
+
+      <div className="card">
+        <div className="specimen-header">
+          <span className="badge">Specimen</span>
+          <span className="badge">Identify this font</span>
+        </div>
+        <div className="specimen-box">
+          <p
+            className="preview"
+            style={
+              ready ? { fontFamily: `"${familyName(revealed)}", ${genericFallback(revealed)}` } : {}
+            }
+          >
+            {SAMPLE}
+          </p>
+        </div>
+      </div>
 
       {!answered && (
-        <div className="options">
+        <div className="options-grid">
           {quiz.options.map((font) => (
             <button key={font.id} onClick={() => void guess(font.id)}>
               {font.name}
@@ -67,13 +81,13 @@ export function Quiz({ daily, today, stats: initial, onClose }: Props) {
 
       {answered && (
         <div className={answered.correct ? 'result good' : 'result bad'}>
-          <strong>{answered.correct ? 'Correct!' : 'Not quite.'}</strong>
+          <strong>{answered.correct ? 'Correct' : 'Not quite'}</strong>
           <p>{revealLine(revealed)}</p>
           <p>
             Streak {stats.streak} (best {stats.bestStreak}) · Accuracy {accuracy(stats)}% over{' '}
             {stats.played} {stats.played === 1 ? 'game' : 'games'}
           </p>
-          <p className="muted">One scored attempt per day. Come back tomorrow.</p>
+          <p className="muted">One scored attempt per day. Resets at midnight.</p>
         </div>
       )}
     </div>
