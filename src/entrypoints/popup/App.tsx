@@ -183,36 +183,46 @@ export function App() {
     );
   }
 
-  const label = spinFont ? spinFont.name : nameVisible ? shown.name : '❓ Mystery font';
+  const label = spinFont ? spinFont.name : nameVisible ? shown.name : 'Mystery font';
   return (
     <main className="popup">
-      <header className="row">
-        <h1>✨ Cursed Fonts</h1>
-        <label className="switch" title="Master on/off">
+      <header className="header">
+        <div className="brand">
+          <span className="brand-icon">Aa</span>
+          <h1>Cursed Fonts</h1>
+        </div>
+        <label className="switch" title="Toggle extension">
           <input
             type="checkbox"
             checked={settings.enabled}
             onChange={(e) => void patch({ enabled: e.target.checked })}
           />
-          <span>{settings.enabled ? 'On' : 'Off'}</span>
+          <span className="switch-toggle" />
+          <span className="switch-text">{settings.enabled ? 'On' : 'Off'}</span>
         </label>
       </header>
 
       <section className="card">
-        <div className="source">{spinFont ? 'Rolling…' : sourceLabel(resolution.source)}</div>
-        <div className="row">
+        <div className="specimen-header">
+          <span className={`badge ${resolution.source === 'pinned' ? 'badge-pinned' : ''}`}>
+            {spinFont ? 'Rerolling…' : sourceLabel(resolution.source)}
+          </span>
           <strong className="font-name">{label}</strong>
-          <button className="primary" disabled={!canAct} onClick={() => void random()}>
-            🎲 Random
-          </button>
         </div>
-        <p
-          className={spinFont ? 'preview spinning' : 'preview'}
-          style={previewStyle(previewFont, readyId === previewFont.id)}
-        >
-          {spinFont ? spinFont.name : SAMPLE}
-        </p>
-        <div className="row">
+
+        <div className="specimen-box">
+          <p
+            className={spinFont ? 'preview spinning' : 'preview'}
+            style={previewStyle(previewFont, readyId === previewFont.id)}
+          >
+            {spinFont ? spinFont.name : SAMPLE}
+          </p>
+        </div>
+
+        <div className="actions-grid">
+          <button className="primary" disabled={!canAct} onClick={() => void random()}>
+            Randomize font
+          </button>
           <select
             aria-label="Random scope"
             value={scope}
@@ -224,38 +234,44 @@ export function App() {
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="secondary-actions">
           {resolution.source !== 'daily' && resolution.source !== 'pinned' && (
-            <button disabled={!tab || busy} onClick={() => void back()}>
-              ↩ Back to today&apos;s font
+            <button className="subtle-btn" disabled={!tab || busy} onClick={() => void back()}>
+              Reset to daily font
             </button>
           )}
-        </div>
-        {tab && siteOn && (
-          <div className="row">
-            {settings.pinnedSites[tab.hostname] ? (
+          {tab &&
+            siteOn &&
+            (settings.pinnedSites[tab.hostname] ? (
               <button
+                className="subtle-btn"
                 disabled={busy}
                 onClick={() => void setSettings(unpinFont(settings, tab.hostname)).then(reload)}
               >
-                📍 Unpin font
+                Unpin from {tab.hostname}
               </button>
             ) : (
               <button
+                className="subtle-btn"
                 disabled={!canAct}
                 onClick={() =>
                   void setSettings(pinFont(settings, tab.hostname, shown.id)).then(reload)
                 }
               >
-                📌 Pin to this site
+                Pin font to this site
               </button>
-            )}
-          </div>
-        )}
+            ))}
+        </div>
       </section>
 
       <section className="card">
-        <label className="row">
-          <span>{tab ? `Enabled on ${tab.hostname}` : 'Not available on this page'}</span>
+        <label className="toggle-row">
+          <div className="toggle-info">
+            <span className="toggle-title">Active on this site</span>
+            <span className="toggle-host">{tab ? tab.hostname : 'No active page'}</span>
+          </div>
           <input
             type="checkbox"
             disabled={!tab || !settings.enabled}
@@ -265,10 +281,12 @@ export function App() {
             }
           />
         </label>
-        <label className="column">
-          <span>
-            Cursed level: <strong>{LEVEL_NAMES[settings.level]}</strong>
-          </span>
+
+        <div className="level-control">
+          <div className="level-header">
+            <span>Cursed intensity</span>
+            <span className="level-badge">{LEVEL_NAMES[settings.level]}</span>
+          </div>
           <input
             type="range"
             min={1}
@@ -277,19 +295,35 @@ export function App() {
             value={settings.level}
             onChange={(e) => void patch({ level: Number(e.target.value) as Settings['level'] })}
           />
-        </label>
+          <div className="level-ticks">
+            <span className={settings.level === 1 ? 'active' : ''}>Tasteful</span>
+            <span className={settings.level === 2 ? 'active' : ''}>Quirky</span>
+            <span className={settings.level === 3 ? 'active' : ''}>Unhinged</span>
+          </div>
+        </div>
       </section>
 
-      <footer className="row">
-        <span>🔥 Streak: {currentStreak(stats, today)}</span>
-        {!settings.alwaysShowName && (
-          <button onClick={() => setView('quiz')}>
-            {quizDone ? 'Quiz result' : 'Guess today’s font'}
-          </button>
-        )}
-        <a href="#options" onClick={() => void browser.runtime.openOptionsPage()}>
-          Options
-        </a>
+      <footer className="footer">
+        <span className="streak-badge">
+          Streak <strong>{currentStreak(stats, today)}d</strong>
+        </span>
+        <div className="footer-links">
+          {!settings.alwaysShowName && (
+            <button className="text-btn" onClick={() => setView('quiz')}>
+              {quizDone ? 'Quiz results' : 'Daily quiz'}
+            </button>
+          )}
+          <a
+            className="text-btn"
+            href="#options"
+            onClick={(e) => {
+              e.preventDefault();
+              void browser.runtime.openOptionsPage();
+            }}
+          >
+            Settings
+          </a>
+        </div>
       </footer>
     </main>
   );

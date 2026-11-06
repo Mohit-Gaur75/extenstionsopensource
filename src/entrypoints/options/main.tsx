@@ -92,7 +92,10 @@ function Options() {
 
   return (
     <main>
-      <h1>Cursed Fonts options</h1>
+      <header className="options-header">
+        <h1>Cursed Fonts Settings</h1>
+        <p className="header-subtitle">Preferences and per-site font overrides</p>
+      </header>
 
       <section>
         <h2>Cursed level</h2>
@@ -191,15 +194,7 @@ function Options() {
           <p className="hint">Fonts pinned to a site never change and do not expire at midnight.</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {Object.entries(settings.pinnedSites).map(([host, fontId]) => (
-              <div
-                key={host}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '8px',
-                }}
-              >
+              <div key={host} className="pinned-item">
                 <span>
                   <strong>{host}</strong>: {fontId}
                 </span>
